@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>本冠AI数字化 · 技术实现方案</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --primary: #1a365d;
+    --gold: #c9a961;
+    --bg: #f8f9fa;
+    --card: #fff;
+    --text: #1a202c;
+    --text-secondary: #4a5568;
+    --text-light: #718096;
+    --border: #e2e8f0;
+    --success: #38a169;
+    --info: #3182ce;
+    --warning: #d69e2e;
+    --danger: #e53e3e;
+  }
+  body {
+    font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .header {
+    background: linear-gradient(135deg, var(--primary) 0%, #0f2544 100%);
+    color: #fff;
+    padding: 40px;
+    border-radius: 16px;
+    margin-bottom: 32px;
+  }
+  .header h1 { font-size: 32px; margin-bottom: 8px; }
+  .header .subtitle { color: rgba(255,255,255,0.7); font-size: 16px; }
+  .header .meta { margin-top: 20px; display: flex; gap: 32px; font-size: 13px; color: rgba(255,255,255,0.6); }
+
+  .section {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-title .num {
+    width: 36px;
+    height: 36px;
+    background: var(--gold);
+    color: #fff;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  /* 技术栈卡片 */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .stack-card {
+    padding: 20px;
+    background: var(--bg);
+    border-radius: 12px;
+    border-left: 3px solid var(--info);
+  }
+  .stack-card h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+  .stack-card p {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  /* 架构图 */
+  .arch-flow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 24px;
+    background: var(--bg);
+    border-radius: 12px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  .arch-node {
+    padding: 16px 20px;
+    background: var(--card);
+    border-radius: 10px;
+    text-align: center;
+    min-width: 120px;
+    border: 1px solid var(--border);
+  }
+  .arch-node.highlight {
+    border-color: var(--gold);
+    background: rgba(201,169,97,0.05);
+  }
+  .arch-node .icon { font-size: 24px; margin-bottom: 8px; }
+  .arch-node .name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .arch-node .desc { font-size: 11px; color: var(--text-light); margin-top: 4px; }
+  .arch-arrow {
+    color: var(--gold);
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  /* 需求详情 */
+  .req-item {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .req-header {
+    padding: 16px 20px;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+  }
+  .req-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--primary);
+  }
+  .priority-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .p0 { background: #fed7d7; color: #c53030; }
+  .p1 { background: #feebc8; color: #c05621; }
+  .p2 { background: #c6f6d5; color: #276749; }
+
+  .req-body { padding: 20px; }
+  .req-body h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin: 16px 0 8px;
+  }
+  .req-body h4:first-child { margin-top: 0; }
+  .req-body p, .req-body li {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+  .req-body ul {
+    padding-left: 20px;
+  }
+  .req-body li { margin-bottom: 6px; }
+
+  /* 表格 */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: var(--bg);
+    font-weight: 600;
+    color: var(--primary);
+  }
+
+  /* 时间线 */
+  .gantt {
+    margin: 20px 0;
+  }
+  .gantt-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 12px;
+  }
+  .gantt-label {
+    width: 200px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+  .gantt-bar-container {
+    flex: 1;
+    height: 28px;
+    background: var(--bg);
+    border-radius: 6px;
+    position: relative;
+  }
+  .gantt-bar {
+    position: absolute;
+    height: 100%;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 11px;
+    color: #fff;
+    font-weight: 500;
+  }
+
+  /* 风险 */
+  .risk-item {
+    padding: 16px;
+    background: #fff5f5;
+    border-left: 3px solid var(--danger);
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 12px;
+  }
+  .risk-item h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #c53030;
+    margin-bottom: 6px;
+  }
+  .risk-item p {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .note {
+    padding: 16px;
+    background: #ebf8ff;
+    border-left: 3px solid var(--info);
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 16px 0;
+  }
+
+  @media (max-width: 768px) {
+    body { padding: 20px; }
+    .stack-grid { grid-template-columns: 1fr; }
+    .arch-flow { flex-direction: column; }
+    .arch-arrow { transform: rotate(90deg); }
+    .gantt-label { width: 120px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 头部 -->
+<div class="header">
+  <h1>本冠集团AI数字化 · 技术实现方案</h1>
+  <div class="subtitle">基于9月19日现场确认需求的详细技术落地设计</div>
+  <div class="meta">
+    <span>📅 2026年9月19日</span>
+    <span>👤 技术方案部</span>
+    <span>🔒 内部技术文档</span>
+  </div>
+</div>
+
+<!-- 1. 总体技术架构 -->
+<div class="section">
+  <div class="section-title">
+    <span class="num">1</span>
+    总体技术架构
+  </div>
+
+  <p style="color: var(--text-secondary); margin-bottom: 20px;">
+    整体以<strong>飞书生态为核心载体</strong>，复用现有工具能力，不额外采购系统。AI能力用现有飞书AI + 豆包智能体，数据层用飞书多维表格。
+  </p>
+
+  <div class="arch-flow">
+    <div class="arch-node">
+      <div class="icon">🎤</div>
+      <div class="name">数据采集层</div>
+      <div class="desc">录音豆 / 手动填报</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node highlight">
+      <div class="icon">🧠</div>
+      <div class="name">AI处理层</div>
+      <div class="desc">飞书AI / 豆包智能体</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node highlight">
+      <div class="icon">📊</div>
+      <div class="name">数据存储层</div>
+      <div class="desc">飞书多维表格</div>
+    </div>
+    <div class="arch-arrow">→</div>
+    <div class="arch-node">
+      <div class="icon">👥</div>
+      <div class="name">应用展示层</div>
+      <div class="desc">专属视图 / 公开看板</div>
+    </div>
+  </div>
+
+  <h4 style="margin: 24px 0 12px; font-size: 15px;">技术栈清单</h4>
+  <div class="stack-grid">
+    <div class="stack-card">
+      <h4>飞书多维表格</h4>
+      <p>核心数据载体，替换现有云文档。支持自动化流程、视图、权限、仪表盘</p>
+    </div>
+    <div class="stack-card">
+      <h4>飞书AI / 豆包智能体</h4>
+      <p>数据结构化、自动生成日报、异常提醒。用现有账号能力，无需额外付费</p>
+    </div>
+    <div class="stack-card">
+      <h4>录音豆（可选）</h4>
+      <p>专家端语音转文字，自动填充表格。降低使用门槛</p>
+    </div>
+    <div class="stack-card">
+      <h4>企业微信审批</h4>
+      <p>现有出差审批系统，需做接口对接自动同步</p>
+    </div>
+    <div class="stack-card">
+      <h4>尔美CRM</h4>
+      <p>现有业务系统，需对接实现自动录入和数据读取</p>
+    </div>
+    <div class="stack-card">
+      <h4>魔镜检测仪</h4>
+      <p>检测设备，需对接数据接口实现照片自动同步</p>
+    </div>
+  </div>
+
+  <div class="note">
+    💡 <strong>关键原则：</strong>所有能力都基于现有工具配置实现，不做定制化开发，不采购新系统。用配置而非开发，用现有AI而非训练模型。
+  </div>
+</div>
+
+<!-- 2. 四项需求详细技术方案 -->
+<div class="section">
+  <div class="section-title">
+    <span class="num">2</span>
+    四项核心需求技术实现
+  </div>
+
+  <!-- 需求1 -->
+  <div class="req-item">
+    <div class="req-header">
+      <h3>2.1 专家咨询提效 · 日报自动化</h3>
+      <span class="priority-badge p0">P0 · 最高优先级</span>
+    </div>
+    <div class="req-body">
+      <h4>痛点拆解</h4>
+      <ul>
+        <li>咨询师每天下午4点后花6小时做：尔美系统录入 + 个人表格 + 管理总表 + 客户回访</li>
+        <li>同一份数据要录3个地方，重复劳动</li>
+        <li>专家时间是最宝贵的资源，不应该花在打字上</li>
+      </ul>
+
+      <h4>技术实现路径</h4>
+      <table>
+        <tr>
+          <th>环节</th>
+          <th>实现方式</th>
+          <th>工具</th>
+        </tr>
+        <tr>
+          <td>语音采集</td>
+          <td>咨询师说完话，录音豆自动转文字</td>
+          <td>录音豆 / 飞书妙记</td>
+        </tr>
+        <tr>
+          <td>结构化处理</td>
+          <td>AI智能体把口语转成结构化字段：客户名、项目、金额、跟进状态</td>
+          <td>豆包智能体 + 提示词工程</td>
+        </tr>
+        <tr>
+          <td>自动写入</td>
+          <td>同时写入：①尔美CRM ②个人工作表格 ③团队总表</td>
+          <td>多维表格API + RPA模拟尔美操作</td>
+        </tr>
+        <tr>
+          <td>人工审核</td>
+          <td>专家只需花5分钟确认AI生成的内容对不对，点确认即可</td>
+          <td>多维表格审批流</td>
+        </tr>
+      </table>
+
+      <h4>分阶段实施</h4>
+      <ul>
+        <li><strong>第一阶段（第2周）：</strong>先跑通语音→多维表格这一段，专家手动点一下同步到尔美。验证AI结构化准确率</li>
+        <li><strong>第二阶段（第3-4周）：</strong>打通尔美自动录入，用RPA模拟浏览器操作，实现全自动</li>
+        <li><strong>第三阶段：</strong>接入回访自动生成，AI根据客户情况自动写回访话术和记录</li>
+      </ul>
+
+      <h4>关键技术点</h4>
+      <ul>
+        <li><strong>提示词工程：</strong>定义好输出格式（JSON结构），确保AI输出字段稳定</li>
+        <li><strong>RPA方案：</strong>尔美没有开放API，用Playwright/Puppeteer模拟人工操作</li>
+        <li><strong>准确率兜底：</strong>AI生成后必须人工确认，不直接进正式系统</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 需求2 -->
+  <div class="req-item">
+    <div class="req-header">
+      <h3>2.2 表格通知配置 · 自动催办</h3>
+      <span class="priority-badge p0">P0 · 最高优先级</span>
+    </div>
+    <div class="req-body">
+      <h4>痛点拆解</h4>
+      <ul>
+        <li>分审岗现在用飞书云文档做表格，没有通知功能</li>
+        <li>要天天人工盯着群里催："谁谁谁你还没填"</li>
+        <li>员工点进表格要手动筛选自己的客户，很麻烦，有抵触情绪</li>
+      </ul>
+
+      <h4>技术实现路径</h4>
+      <table>
+        <tr>
+          <th>配置项</th>
+          <th>实现方式</th>
+          <th>效果</th>
+        </tr>
+        <tr>
+          <td>专属视图</td>
+          <td>多维表格按"负责人"字段做筛选视图，每个人登录只看自己的</td>
+          <td>不用手动筛选，点进去就是自己的活</td>
+        </tr>
+        <tr>
+          <td>新增通知</td>
+          <td>配置自动化：新增记录时，自动@对应负责人发飞书消息</td>
+          <td>有新任务自动推送，不用等人说</td>
+        </tr>
+        <tr>
+          <td>到期提醒</td>
+          <td>配置自动化：到期前X小时没填，自动催办</td>
+          <td>分审岗不用天天盯</td>
+        </tr>
+        <tr>
+          <td>变更通知</td>
+          <td>关键字段修改时，通知相关负责人和管理层</td>
+          <td>信息同步及时，不用来回问</td>
+        </tr>
+      </table>
+
+      <h4>实施步骤</h4>
+      <ul>
+        <li>第1步：把现有云文档的数据迁移到多维表格（直接导入）</li>
+        <li>第2步：配置每个岗位的专属视图（现场已开始做）</li>
+        <li>第3步：配置自动化通知规则（新增/修改/到期提醒）</li>
+        <li>第4步：配置分级权限——院内可见，外部不可见</li>
+      </ul>
+
+      <div class="note">
+        ✅ <strong>这个最快，纯配置就能搞定，不需要开发。</strong>今天现场已经开始配了，一周内全部上线。
+      </div>
+    </div>
+  </div>
+
+  <!-- 需求3 -->
+  <div class="req-item">
+    <div class="req-header">
+      <h3>2.3 行程看板搭建 · 审批自动同步</h3>
+      <span class="priority-badge p0">P0 · 最高优先级</span>
+    </div>
+    <div class="req-body">
+      <h4>痛点拆解</h4>
+      <ul>
+        <li>主任出差审批在企业微信，谭院批完就完事了</li>
+        <li>分诊岗要手动把审批结果抄到行程表</li>
+        <li>市场端要行程信息，分诊岗每周手动汇总发截图</li>
+        <li>现在有三张表：主任时间、院内公休、仪器使用，信息分散</li>
+      </ul>
+
+      <h4>技术实现路径</h4>
+      <table>
+        <tr>
+          <th>模块</th>
+          <th>实现方式</th>
+          <th>难度</th>
+        </tr>
+        <tr>
+          <td>审批对接</td>
+          <td>企业微信审批通过后，通过Webhook推送到飞书多维表格</td>
+          <td>中 · 需要两边各配置</td>
+        </tr>
+        <tr>
+          <td>整合看板</td>
+          <td>三张表合并成一个仪表盘，按日期/人员/类型多维度展示</td>
+          <td>低 · 多维表格仪表盘功能</td>
+        </tr>
+        <tr>
+          <td>市场端权限</td>
+          <td>给区总开只读链接，按区域筛选，只能看自己辖区的</td>
+          <td>中 · 需按组织架构配权限</td>
+        </tr>
+        <tr>
+          <td>变更通知</td>
+          <td>行程变更时，自动通知申请人和相关方</td>
+          <td>低 · 自动化规则</td>
+        </tr>
+      </table>
+
+      <h4>技术难点</h4>
+      <ul>
+        <li><strong>跨平台对接：</strong>企业微信 → 飞书，需要做中间层Webhook接收和转发</li>
+        <li><strong>权限粒度：</strong>市场端没接入飞书组织架构，只能用"分享链接+密码"或单独开账号</li>
+        <li><strong>数据一致性：</strong>审批改了要能同步更新，不能只推一次</li>
+      </ul>
+
+      <h4>降级方案</h4>
+      <p>如果企业微信对接太复杂，第一版先做：谭院审批后在飞书表格里填一下，其他自动同步。先把看板做出来用着，后续再接自动审批。</p>
+    </div>
+  </div>
+
+  <!-- 需求4 -->
+  <div class="req-item">
+    <div class="req-header">
+      <h3>2.4 魔镜落地对接 · 老数据批量导入</h3>
+      <span class="priority-badge p0">P0 · 最高优先级</span>
+    </div>
+    <div class="req-body">
+      <h4>痛点拆解</h4>
+      <ul>
+        <li>资深前咨手里攒了大量老客户档案，分散在各处</li>
+        <li>魔镜不支持批量导入，只能手动一条条导VIP</li>
+        <li>后续越积越多，不解决就是个雷</li>
+      </ul>
+
+      <h4>技术实现路径</h4>
+      <table>
+        <tr>
+          <th>步骤</th>
+          <th>工作内容</th>
+          <th>负责方</th>
+        </tr>
+        <tr>
+          <td>1. 数据盘点</td>
+          <td>先摸清楚：有多少客户、数据在哪、格式是什么</td>
+          <td>前咨 + 技术支持</td>
+        </tr>
+        <tr>
+          <td>2. 数据清洗</td>
+          <td>把零散的Excel/聊天记录/旧系统导出，整理成标准格式</td>
+          <td>技术支持主导</td>
+        </tr>
+        <tr>
+          <td>3. 批量导入</td>
+          <td>导入尔美CRM系统，按客户归档</td>
+          <td>技术支持 + 尔美后台</td>
+        </tr>
+        <tr>
+          <td>4. 魔镜对接</td>
+          <td>打通尔美→魔镜的数据通道，客户档案同步过去</td>
+          <td>魔镜技术方 + 技术支持</td>
+        </tr>
+      </table>
+
+      <h4>关键问题</h4>
+      <ul>
+        <li><strong>魔镜开放度：</strong>需要先确认魔镜有没有开放API，能不能做对接。如果不行，就得手动导，或者换方案</li>
+        <li><strong>数据质量：</strong>老数据肯定有很多不规范的，要花时间清洗</li>
+        <li><strong>隐私合规：</strong>客户数据导出导入，要确认合规，不能出安全问题</li>
+      </ul>
+
+      <div class="note">
+        ⚠️ <strong>这个需求的不确定性最高</strong>，取决于魔镜系统的开放程度。建议先花1天时间调研魔镜API，确认可行再排期。
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. 排期计划 -->
+<div class="section">
+  <div class="section-title">
+    <span class="num">3</span>
+    排期计划（甘特图）
+  </div>
+
+  <div class="gantt">
+    <div class="gantt-row">
+      <div class="gantt-label">表格通知配置</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar" style="left: 0%; width: 25%; background: var(--success);">第1周</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label">专家日报自动化（试点）</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar" style="left: 20%; width: 25%; background: var(--info);">第2-3周</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label">行程看板上线</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar" style="left: 35%; width: 25%; background: var(--warning);">第3-4周</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label">魔镜对接调研</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar" style="left: 0%; width: 15%; background: var(--danger);">第1周调研</div>
+      </div>
+    </div>
+    <div class="gantt-row">
+      <div class="gantt-label">老数据批量导入</div>
+      <div class="gantt-bar-container">
+        <div class="gantt-bar" style="left: 50%; width: 35%; background: var(--danger);">第5-8周</div>
+      </div>
+    </div>
+  </div>
+
+  <table style="margin-top: 24px;">
+    <tr>
+      <th>里程碑</th>
+      <th>时间点</th>
+      <th>交付物</th>
+      <th>验收标准</th>
+    </tr>
+    <tr>
+      <td>M1：表格通知上线</td>
+      <td>第1周末</td>
+      <td>多维表格 + 自动通知 + 专属视图</td>
+      <td>分审岗不用再人工催办</td>
+    </tr>
+    <tr>
+      <td>M2：专家提效试点</td>
+      <td>第2周末</td>
+      <td>语音→表格自动化流程</td>
+      <td>1-2个咨询师试用，日报录入时间减半</td>
+    </tr>
+    <tr>
+      <td>M3：行程看板上线</td>
+      <td>第4周末</td>
+      <td>公开看板 + 市场端只读权限</td>
+      <td>分诊岗不用手动发截图</td>
+    </tr>
+    <tr>
+      <td>M4：魔镜对接验证</td>
+      <td>第8周末</td>
+      <td>首批老客户数据导入魔镜</td>
+      <td>100个VIP客户档案完整可查</td>
+    </tr>
+  </table>
+</div>
+
+<!-- 4. 风险与应对 -->
+<div class="section">
+  <div class="section-title">
+    <span class="num">4</span>
+    风险与应对
+  </div>
+
+  <div class="risk-item">
+    <h4>⚠️ 风险1：员工抵触，不愿意用新工具</h4>
+    <p><strong>应对：</strong>从最痛的点切入，先给分审岗解决催办问题，让大家看到好处。不改变原有工作习惯，只是省力气。选1-2个愿意尝试的先试点，做出效果再推广。</p>
+  </div>
+
+  <div class="risk-item">
+    <h4>⚠️ 风险2：尔美系统没有开放API，对接难度大</h4>
+    <p><strong>应对：</strong>先用RPA（模拟人工操作）的方式实现，不依赖官方API。如果尔美后续开放了API，再切换过去。实在不行就先做半自动——AI生成内容，专家点一下粘贴。</p>
+  </div>
+
+  <div class="risk-item">
+    <h4>⚠️ 风险3：魔镜系统不支持批量导入和对接</h4>
+    <p><strong>应对：</strong>第1周先调研确认。如果不行，就先不做魔镜对接，把老数据导入尔美系统就行，魔镜那块放一放。不硬啃。</p>
+  </div>
+
+  <div class="risk-item">
+    <h4>⚠️ 风险4：AI结构化准确率不够，专家要花更多时间改</h4>
+    <p><strong>应对：</strong>初期AI只做草稿，专家做审核。不断优化提示词，用专家的历史数据做few-shot示例，逐步提高准确率。目标是AI做80%，人改20%，而不是100%全自动。</p>
+  </div>
+
+  <div class="risk-item">
+    <h4>⚠️ 风险5：企业微信和飞书跨平台对接复杂</h4>
+    <p><strong>应对：</strong>第一版先做半自动——谭院审批完，点一下就同步到飞书表格。先把流程跑通用着，后续再接自动Webhook。不要一上来就追求全自动。</p>
+  </div>
+</div>
+
+<!-- 5. 下一步行动 -->
+<div class="section">
+  <div class="section-title">
+    <span class="num">5</span>
+    下一步行动项
+  </div>
+
+  <table>
+    <tr>
+      <th>#</th>
+      <th>行动项</th>
+      <th>负责人</th>
+      <th>时间</th>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>跟谭院确认：所有外出审批统一由她审批，不用她手动操作</td>
+      <td>艾明</td>
+      <td>本周内</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>今天先完成表格通知配置的前2项（专属视图 + 基础通知）</td>
+      <td>技术支持</td>
+      <td>今天</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>对接谭院，把企业微信审批和飞书行程表打通</td>
+      <td>技术支持</td>
+      <td>下周</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>调研魔镜系统开放度，确认批量导入可行性</td>
+      <td>技术支持</td>
+      <td>第1周</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>选1个咨询师试点日报自动化，跑通流程</td>
+      <td>技术支持 + 咨询师</td>
+      <td>第2周</td>
+    </tr>
+  </table>
+
+  <div class="note" style="margin-top: 24px;">
+    📌 <strong>核心原则：</strong>先干起来，边跑边优化。不搞完美方案，先用起来再说。每周看一次效果，不对就调。
+  </div>
+</div>
+
+</body>
+</html>
