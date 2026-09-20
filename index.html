@@ -129,6 +129,66 @@ section{padding:72px 0 8px;}
 }
 .summary-conclusion strong{color:var(--teal);font-weight:600;}
 
+/* ---------- 五项需求结构化地图 ---------- */
+.p0map{margin-top:28px;}
+.p0map-label{
+  display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+  font-family:var(--serif);font-weight:700;font-size:15px;color:var(--ink);
+  margin:0 0 14px;
+}
+.p0map-label .pl-line{display:inline-block;width:4px;height:15px;background:var(--teal);border-radius:2px;align-self:center;}
+.p0map-label.boss{margin-top:22px;}
+.p0map-label.boss .pl-line{background:var(--gold);}
+.p0map-label small{font-family:var(--sans);font-weight:400;font-size:12px;color:var(--ink-3);}
+.p0-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.p0{
+  position:relative;background:var(--paper-card);border:1px solid var(--line);
+  border-radius:12px;padding:18px 16px 16px;overflow:hidden;
+  display:flex;flex-direction:column;
+}
+.p0::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--pc);}
+.p0-no{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--pc);line-height:1;margin-bottom:8px;}
+.p0-tt{font-size:14.5px;font-weight:600;color:var(--ink);line-height:1.45;margin-bottom:12px;min-height:42px;}
+.p0-from{font-size:12.5px;line-height:1.6;color:var(--ink-3);position:relative;padding-left:40px;margin-bottom:8px;}
+.p0-from::before{content:"现状";position:absolute;left:0;top:1px;font-size:10.5px;color:var(--ink-3);border:1px solid var(--line-soft);border-radius:4px;padding:1px 5px;}
+.p0-arrow{color:var(--gold);font-size:14px;margin:-2px 0 8px 2px;}
+.p0-to{font-size:12.5px;line-height:1.65;color:var(--ink-2);position:relative;padding-left:48px;font-weight:500;}
+.p0-to::before{content:"实现后";position:absolute;left:0;top:1px;font-size:10.5px;color:#fff;background:var(--pc);border-radius:4px;padding:1px 5px;font-weight:400;}
+.p0-boss{
+  display:flex;align-items:center;gap:22px;background:var(--ink);border-radius:12px;
+  padding:22px 26px;color:#f4f5f1;
+}
+.pb-no{font-family:var(--serif);font-size:40px;font-weight:700;color:var(--gold-soft);line-height:1;flex-shrink:0;}
+.pb-body{flex:1;min-width:0;}
+.p0-boss .p0-tt{color:#fff;font-size:17px;margin-bottom:8px;min-height:0;}
+.pb-flow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;line-height:1.6;}
+.pb-flow span:first-child{color:rgba(244,245,241,.62);}
+.pb-flow b{color:var(--gold-soft);font-size:15px;}
+.pb-flow .hl{color:#fff;font-weight:600;}
+.pb-badge{
+  flex-shrink:0;font-size:12px;letter-spacing:.08em;color:var(--gold-soft);
+  border:1px solid rgba(201,170,109,.55);border-radius:20px;padding:6px 14px;
+}
+.p0-concl{
+  margin-top:18px;display:flex;gap:0;flex-wrap:wrap;
+  background:rgba(14,78,70,.06);border:1px solid rgba(14,78,70,.14);border-radius:12px;overflow:hidden;
+}
+.pc-item{flex:1 1 200px;padding:14px 20px;font-size:13px;color:var(--ink-2);line-height:1.5;border-left:1px solid rgba(14,78,70,.1);}
+.pc-item:first-child{border-left:none;}
+.pc-item b{display:block;font-size:11.5px;color:var(--teal);letter-spacing:.06em;margin-bottom:3px;}
+.pc-item.mute{flex:1 1 100%;border-left:none;border-top:1px solid rgba(14,78,70,.1);color:var(--ink-3);font-size:12.5px;background:rgba(14,78,70,.03);}
+@media(max-width:900px){
+  .p0-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:560px){
+  .p0-grid{grid-template-columns:1fr;}
+  .p0-from,.p0-to{font-size:13.5px;}
+  .p0-boss{flex-direction:column;align-items:flex-start;gap:14px;padding:20px;}
+  .pb-badge{align-self:flex-start;}
+  .pc-item{flex:1 1 100%;border-left:none;border-top:1px solid rgba(14,78,70,.1);}
+  .pc-item:first-child{border-top:none;}
+}
+
 /* ---------- 前提声明 ---------- */
 .premise{
   margin-top:36px;padding:30px 32px;border-radius:14px;
@@ -514,8 +574,59 @@ section{padding:72px 0 8px;}
       <div class="ss"><div class="v gold">5 个</div><div class="k">里程碑验收</div></div>
     </div>
 
-    <div class="summary-conclusion">
-      本方案基于两次调研：<strong>8 月 24 日与谭院（业务院长）的深度调研</strong>，系统梳理了业务流全链路痛点；<strong>9 月 19 日与沈院（运营院长，谭院当日请假）现场核实</strong>，共同确定四项一线员工每天都痛的事先行：让咨询师从每天数小时写日报、录系统变为 5 分钟审日报（含回访话术一键生成）；让分审岗不再人工催办；让院长 / 主任行程、公休、仪器信息实时透明；把散落在个人手里的老客户数据沉淀进尔美 CRM。<strong>同时采纳谭院 8 月 24 日为章总提出的建议，将「经营管理看板」纳入第一阶段</strong>，让老板第一阶段就能看到实时经营数据。推荐以<strong>飞书企业版为载体轻量落地</strong>，投入约为定制开发的四成，第 1 周即有成果上线。谭院调研中提出的<strong>预约盘点、新客周汇总</strong>等其余协同需求已完整记录，列入第二阶段储备。
+    <div class="p0map">
+      <div class="p0map-label"><span class="pl-line"></span>一线员工 · 每天都痛的 4 件事<small>9 月 19 日与沈院现场确认先行</small></div>
+      <div class="p0-grid">
+        <div class="p0" style="--pc:var(--teal)">
+          <div class="p0-no">01</div>
+          <div class="p0-tt">咨询师日报自动化</div>
+          <div class="p0-from">每天数小时写日报、录系统，同一份数据录三遍</div>
+          <div class="p0-arrow">↓</div>
+          <div class="p0-to">5 分钟审日报；回访清单、时点、话术 AI 一键生成</div>
+        </div>
+        <div class="p0" style="--pc:var(--green)">
+          <div class="p0-no">02</div>
+          <div class="p0-tt">协同录入与催办</div>
+          <div class="p0-from">分审岗人工盯群、逐个催，时效性无法把控</div>
+          <div class="p0-arrow">↓</div>
+          <div class="p0-to">系统自动催办，员工打开即见自己的待办与任务</div>
+        </div>
+        <div class="p0" style="--pc:var(--gold)">
+          <div class="p0-no">03</div>
+          <div class="p0-tt">行程 · 公休 · 仪器看板</div>
+          <div class="p0-from">院长 / 主任行程、公休、仪器四处问，审批后手动改表</div>
+          <div class="p0-arrow">↓</div>
+          <div class="p0-to">四类排期一屏实时透明，谭院审批即自动更新</div>
+        </div>
+        <div class="p0" style="--pc:var(--taupe)">
+          <div class="p0-no">04</div>
+          <div class="p0-tt">老客户数据沉淀</div>
+          <div class="p0-from">档案散落个人表格、聊天记录与旧手机</div>
+          <div class="p0-arrow">↓</div>
+          <div class="p0-to">清洗去重后统一入尔美 CRM，一客一档 AI 自动生成</div>
+        </div>
+      </div>
+
+      <div class="p0map-label boss"><span class="pl-line"></span>老板视角 · 1 件事<small>谭院 8 月 24 日为章总提出，本次纳入第一阶段</small></div>
+      <div class="p0-boss">
+        <div class="pb-no">05</div>
+        <div class="pb-body">
+          <div class="p0-tt">经营管理看板 · 老板驾驶舱</div>
+          <div class="pb-flow">
+            <span>等财务发表、等口头汇报；当月组 30 场会，每场到院、成交看不到实时进展</span>
+            <b>→</b>
+            <span class="hl">会议 / 到院 / 成交 / 新客转化一屏实时掌握，可下钻明细</span>
+          </div>
+        </div>
+        <div class="pb-badge">老板视角</div>
+      </div>
+
+      <div class="p0-concl">
+        <div class="pc-item"><b>推荐载体</b>飞书企业版轻量落地，配置为主、轻度开发为辅</div>
+        <div class="pc-item"><b>投入对比</b>约为定制开发的四成（6.3 万 / 35 人天）</div>
+        <div class="pc-item"><b>见效节奏</b>第 1 周首个成果上线，8 周完成交付</div>
+        <div class="pc-item mute">谭院调研中提出的预约盘点、新客周汇总等其余协同需求已完整记录，列入第二阶段储备。</div>
+      </div>
     </div>
 
     <div class="origin-strip">
